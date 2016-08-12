@@ -1,0 +1,23 @@
+{
+  "Header": {
+    "Duration": 11.0516
+  },
+  "Body": {
+    "Count": 1,
+    "TotalCount": 1,
+    "Results": [
+      {
+        "Guid": "2f95f1ba-ac17-49c8-b7fa-add7a4da3964",
+        "UserGuid": "c0b231e9-7d98-4f52-885e-af4837faa352",
+        "DateCreated": 1470984024000,
+        "DateModified": 1470984024000,
+        "FullName": "Chaos.Portal.Core.Data.Model.Session"
+      }
+    ]
+  },
+  "Error": {
+    "Fullname": null,
+    "Message": null,
+    "InnerException": null
+  }
+}

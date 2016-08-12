@@ -1,7 +1,5 @@
 package dk.statsbiblioteket.mediestream.larmharvester;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,7 +7,6 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.ListIterator;
 
 /**
  * Created by baj on 7/28/16.
@@ -22,28 +19,25 @@ public class Harvester{
     private String searchStr = "Search/Get?q=*";
     private String sessionCreateStr = "Session/Create?";
     private String pageIndexStr = "&pageIndexStr=";
-    private String formatStr = "&formatStr=json2";
+    private String formatStr = "formatStr=json2";
     private String sessionGUIDStr = "&sessionGUIDStr=";
     private String sessionGUID;
 
     private String userHTTPStatusCodes = "&userHTTPStatusCodes=False";
-    private String pageSize;
+    private String pageSize = "&pageSize=100";
+
+    public static final String ampersand = "&";
 
     public Harvester() throws IOException {
-        urlStrStart = "https://dev.api.dighumlab.org/v6/";
-        pageSize = "&pageSize=100";
-
-        sessionGUID = httpGet(urlStrStart + sessionCreateStr + formatStr + userHTTPStatusCodes);
-        log.debug("sessionGUID = " + sessionGUID);
-        System.out.println(sessionGUID);
-        sessionGUID = "7ad87c25\u00AD1174\u00AD4622\u00ADb1e4\u00ADf5020cbe10e1";
-
+        this("https://dev.api.dighumlab.org/v6/");
     }
 
     public Harvester(String urlStrStart) throws IOException {
-        this();
         this.urlStrStart = urlStrStart;
-
+        sessionCreate();
+        log.debug("sessionGUID = " + sessionGUID);
+        System.out.println(sessionGUID);
+        sessionGUID = "7ad87c25\u00AD1174\u00AD4622\u00ADb1e4\u00ADf5020cbe10e1";
     }
 
     public String harvest() throws IOException {
@@ -55,23 +49,11 @@ public class Harvester{
         return jsonStr;
     }
 
-    public String filter(String jsonStr) {
-        JSONObject jsonObject = JSONObject.fromObject(jsonStr);
-
-        JSONObject body = jsonObject.getJSONObject("Body");
-        log.debug("Body", body);
-        JSONArray results = body.getJSONArray("Results");
-        log.debug("results.size() = " + results.size());
-
-        ListIterator resultsIterator = results.listIterator();
-        JSONObject asset;
-        while (resultsIterator.hasNext()) {
-            asset = (JSONObject) resultsIterator.next();
-            if (asset.has("Annotations")) {
-                log.debug("Bib");
-            }
-        }
-        return "";
+    public void sessionCreate() throws IOException {
+        String jsonStr = httpGet(urlStrStart + sessionCreateStr + formatStr + userHTTPStatusCodes);
+        log.debug(urlStrStart + sessionCreateStr + formatStr + userHTTPStatusCodes);
+        log.debug("sessionCreate jsonStr = ", jsonStr);
+        sessionGUID = new Parser().parseSessionCreateToSessionGuid(jsonStr);
     }
 
     /**
@@ -83,7 +65,7 @@ public class Harvester{
      */
     public String harvest(int i) throws IOException {
         String urlStr = urlStrStart + searchStr + pageIndexStr + i + pageSize + sessionGUIDStr + sessionGUID
-                + formatStr + userHTTPStatusCodes;
+                + ampersand + formatStr + userHTTPStatusCodes;
         log.debug("urlStr = " + urlStr);
         return httpGet(urlStr);
     }
